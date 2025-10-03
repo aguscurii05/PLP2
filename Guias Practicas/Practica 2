@@ -1,0 +1,375 @@
+Practica 2
+
+Ejercicio 1
+
+Sean las siguientes definiciones de funciones:
+
+	- {I} intercambiar (x,y) = (y,x)
+	- {E1} espejar (Left x) = Right x
+	  {E2} espejar (Right x) = Left x
+	- {AI} asociarI (x,(y,z)) = ((x,y),z)
+	- {AD} asociarD ((x,y),z)) = (x,(y,z))
+	- {F} flip f x y = f y x
+	- {C} curry f x y = f (x,y)
+	- {UC} uncurry f (x,y) = f x y
+
+Demostrar las siguientes igualdades usando los lemas de generación cuando sea necesario:
+
+i. ∀ p::(a,b) . intercambiar (intercambiar p) = p
+
+	Por lema de generacion de pares existen x::a e y::b tal que p=(x,y)
+
+	intercambiar (intercambiar (x,y)) ={I} intercambiar (y,x) ={I} (x,y)
+
+
+
+
+ii. ∀ p::(a,(b,c)) . asociarD (asociarI p) = p
+
+
+	Por lema de generacion de pares existen x::a e x'::(b,c) tal que p=(x,y) y existen y::b y z::c tal que x'=(b,c), y entonces p=(x,(y,z))
+
+	asociarD (asociarI (x,(y,z))) ={AI} asociarD ((x,y),z) ={AD} (x,(y,z))
+
+
+
+
+iii. ∀ p::Either a b . espejar (espejar p) = p
+
+	Por lema de generacion de Either p= Left x con x::a o p= Right y con y::b
+
+	Caso p=Left x
+
+		espejar (espejar (Left x)) ={E1} espejar (Right x) ={E2} Left x
+
+	Caso p=Right y
+
+		espejar (espejar (Right y)) ={E2} espejar (Left y) ={E1} Right y
+
+
+
+
+iv. ∀ f::a->b->c . ∀ x::a . ∀ y::b . flip (flip f) x y = f x y
+
+
+	flip (flip f) x y ={F} (flip f) y x ={F} f x y
+
+
+
+
+v. ∀ f::a->b->c . ∀ x::a . ∀ y::b . curry (uncurry f) x y = f x y
+
+	curry (uncurry f) x y ={C} (uncurry f) (x,y) ={UC} f x y
+
+Ejercicio 2 ⋆
+
+Demostrar las siguientes igualdades utilizando el principio de extensionalidad funcional:
+
+	*Uso los defs anteriores
+
+	{COMP} (f . g) x = f (g x)
+	{F} flip f x y = f y x
+	{I} id x = x
+	{CONST} const x y = x
+
+i. flip . flip = id
+
+	Por extensionalidad, qvq ∀f::a->b ∀x::a.∀y::b  (flip.flip) f x y= id 
+
+	(flip. flip) f x y ={COMP} flip (flip f x y) ={F} flip f y x ={F} f x y
+
+
+
+
+
+ii. ∀ f::(a,b)->c . uncurry (curry f) = f
+
+	Por extensionalidad qvq ∀p::(a,b) uncurry (curry f) p = f p. Luego por lema de generacion de pares ∃x::a.∃y::b. p=(x,y)
+
+
+	uncurry (curry f) (x,y) ={UC} curry f x y ={C} f (x,y)
+
+
+
+
+
+iii. flip const = const id
+
+	Por extensionalidad quiero ver que ∀x::a.∀y::b flip const x y = const id x y
+
+	Izq:
+
+		flip const x y ={F} const y x={CONST} y
+
+	Der:
+
+		const id x y={asociatividad} (const id x) y ={CONST} id y ={I} y
+
+
+
+
+
+iv. ∀ f::a->b . ∀ g::b->c . ∀ h::c->d . ((h . g) . f) = (h . (g . f))
+
+
+	Por extensionalidad quiero ver que ∀x::a ((h.g).f) x = (h.(g.f)) x
+
+
+	Izq:
+
+		((h.g).f) x ={COMP} (h.g (f x)) ={COMP} h (g (f x))
+
+	Der:
+
+		(h. (g.f)) x ={COMP} h ((g.f) x) ={COMP} h (g (f x))
+
+
+
+Induccion sobre listas
+
+En esta sección usaremos las siguientes definiciones (y las de elem, foldr, foldl, map y filter vistas en clase):
+
+	{L0} length [] = 0
+	{L1} length (x:xs) = 1 + length xs
+	
+	{D0} duplicar [] = []
+	{D1} duplicar (x:xs) = x : x : duplicar xs
+	
+	
+	{++0} [] ++ ys = ys
+	{++1} (x:xs) ++ ys = x : (xs ++ ys)
+	
+	{A0} append xs ys = foldr (:) ys xs
+	
+	{R0} reverse = foldl (flip (:)) []
+
+	{E0} elem e [] = False
+	{E1} elem e (x:xs) = (e == x) || elem e xs
+	
+	{MAP} map f (x:xs) = foldr (\x->\r-> f x :r) [] (x:xs)
+
+	{FLT} filter f (x:xs) = foldr (\x->\r-> if f x then x:r else r) []
+
+	{FL0} foldl f ac [] = ac
+	{FL1} foldl f ac (x:xs) = foldl f (f ac x) xs
+
+	{FR0} foldr f z [] = z
+	{FR1} foldr f z (x:xs) = f x (foldr f z xs)	
+
+
+Ejercicio 3 ⋆
+
+Demostrar las siguientes propiedades:
+
+i. ∀ xs::[a] . length (duplicar xs) = 2 * length xs
+
+	P(xs) = length (duplicar xs) = 2 * length xs
+
+	Lo veo por induccion sobre xs::[a]
+
+	Caso xs=[]
+
+		length (duplicar []) ={D0} length [] ={L0} 0 ={Int} 2*0 = {L0} 2 * length []
+
+
+	Caso xs=y:ys con y::a e ys::[a]
+
+		Asumo como HI P(ys). Qvq vale P(y:ys)
+
+		length (duplicar (y:ys)) = length (y:y:duplicar ys) = {L1} 1+ length (y:duplicar ys) = {L1} 1 + 1 + length (duplicar ys) = {HI} 1 + 1 + 2* length ys = {Int} 2 + 2* length ys ={Int} 2 * (1+length ys) = {L1} 2* length (y:ys)
+
+		Asi queda probado el caso xs=y:ys
+
+	Probados ambos casos queda probada la propiedad P ∀xs::[a]
+
+
+
+
+
+
+
+
+
+ii. ∀ xs::[a] . ∀ ys::[a] . length (xs ++ ys) = length xs + length ys
+
+
+	P(xs) = ∀ys::[a]. length (xs ++ ys) = length xs + length ys
+
+	Lo veo por induccion en xs::[a]
+
+	Caso xs = []
+
+		length ([] ++ ys) ={++0} length ys ={Int} 0 + length ys = {L0} length [] + length ys
+
+	Caso xs=z:zs
+
+		Asumo como HI P(zs). Qvq vale P(z:zs)
+
+		length ((z:zs)++ys) ={++1} length (x: (zs++ys)) ={L1} 1 + length (zs++ys) ={HI} 1 + length zs + length ys ={L1} length (z:zs) + length ys
+
+	Probados ambos casos, queda probada la propiedad P ∀xs::[a]
+
+
+iii. ∀ xs::[a] . ∀ x::a . [x] ++ xs = x:xs
+
+	Lo veo por induccion en xs 
+
+	Caso xs=[]
+
+		[x] ++ [] ={++1} x:([]++[]) ={++0} x:[]
+
+
+	Caso xs=y:ys
+
+		(x:[]) ++ (y:ys) ={++1} x:([]++(y:ys)) ={++0}  x:(y:ys)
+
+
+	Probados ambos casos, queda probada la propiedad P ∀xs::[a]
+	
+
+iv. ∀ xs::[a] . xs ++ [] = xs
+
+
+	Lo veo por induccion en xs
+
+	Caso xs=[]
+
+		[]++[]={++0} []
+
+	Caso xs=y:ys
+
+		Asumo como HI P(ys). Qvq vale P(y:ys)
+
+		(y:ys) ++ [] ={++1} y: (ys++[]) ={HI} y:ys
+
+
+	Probados ambos casos, queda probada la propiedad P ∀xs::[a]
+
+
+v. ∀ xs::[a] . ∀ ys::[a] . ∀ zs::[a] . (xs ++ ys) ++ zs = xs ++ (ys ++ zs)
+
+	Lo veo por induccion en xs
+
+	Caso xs=[]
+
+		([]++ys)++zs ={++0} ys++zs ={++0} [] ++ (ys++zs)
+
+
+	Caso xs = m:ms
+
+		Asumo como HI P(ys). Qvq vale P(y:ys)
+		
+		((m:ms) ++ ys) ++ zs ={++1} (m:(ms ++ ys)) ++ zs ={++1} m: ((ms ++ ys) ++ zs) ={HI} m:(ms ++ (ys ++ zs)) ={++1} (m:ms) ++ (ys ++ zs)
+
+
+	Probados ambos casos, queda probada la propiedad P ∀xs::[a]
+
+
+
+vi. ∀ xs::[a] . ∀ f::(a->b) . length (map f xs) = length xs
+
+	Lo veo por induccion en xs
+
+	Caso xs=[]
+
+		length (map f []) ={M} length (foldr (\x->\r-> f x :r) [] []) ={FR0} length []
+
+
+	Caso xs=(y:ys)
+
+		Asumo como HI P(ys). Qvq vale P(y:ys)
+
+		length (map f (y:ys)) ={MAP} length (foldr (\x->\r-> f x :r) [] (y:ys)) 
+							  ={FR1} length ((\x->\r-> f x :r) y (foldr (\x->\r-> f x :r) [] ys))
+							  ={MAP} length ((\x->\r-> f x :r) y (map f ys))
+							  ={Beta} length (y:map f ys) 
+							  ={L1} 1 + length (map f ys)
+							  ={HI} 1 + length ys
+							  ={L1} length (y:ys)
+
+	Probados ambos casos, queda probada la propiedad P ∀xs::[a]
+
+
+vii. ∀ xs::[a] . ∀ p::a->Bool . ∀ e::a . (elem e (filter p xs) ⇒ elem e xs) (si vale Eq a)
+
+	P(xs) = ∀ p::a->Bool . ∀ e::a . (elem e (filter p xs) ⇒ elem e xs)
+
+	Lo veo por induccion en xs
+
+	Caso xs = []
+
+		Antecedente:
+
+		elem e (filter p []) ={FLT} elem e (foldr (\x->\r-> if p x then x:r else r) [] [])
+							 ={FR0} elem e []
+							 ={E0} False
+
+		Consecuente: 
+
+		elem e [] ={E0} False
+
+		Luego, False -> False es True por Bool
+
+
+
+	Caso xs= (y:ys)
+
+		Asumo como HI P(ys). Qvq vale P(y:ys)
+
+		Antecedente:
+
+		elem e (filter p (y:ys)) ={FLT} elem e (foldr (\x->\r-> if p x then x:r else r) [] (y:ys))
+								 ={FR1} elem e ((\x->\r-> if p x then x:r else r) y (foldr (\x->\r-> if p x then x:r else r) [] ys))
+								 ={FLT} elem e ((\x->\r-> if p x then x:r else r) y (filter p ys))
+								 ={Beta} elem e (if p y then y:(filter p ys) else filter p ys)
+
+
+	 	Por lema de generacion de Bool p y es True o False
+
+	 		Caso p y = True
+
+	 			elem e (if p y then y:(filter p ys) else filter p ys) = elem e (if True then y:(filter p ys) else filter p ys) 
+	 														          ={Bool} elem e (y:(filter p ys))
+	 														          ={E1} e==y || elem e (filter p ys)
+
+	 	    	Por lema de generacion de Bool e==y es True o False
+
+	 	    	Caso e==y = True
+
+	 	    		e==y || elem e (filter p ys) = True || elem e (filter p ys)
+	 	    									 ={Bool} True
+
+
+	 	    		Veo el consecuente:
+
+	 	    			elem e (y:ys) ={E1} e==y || elem e ys
+	 	    						  = True || elem e ys
+	 	    						  ={Bool} True
+
+	 	    		Luego True -> True es True por Bool
+
+	 	    	Caso e==y = False
+
+	 	    		e==y || elem e (filter p ys) = False || elem e (filter p ys)
+	 	    									 ={Bool} elem e (filter p ys)
+
+	 	    		Veo el consecuente:
+
+	 	    			elem e (y:ys)={E1} e==y || elem e ys 
+	 	    						 = False || elem e ys
+	 	    						 ={Bool} elem e ys
+
+	 	    		Asi tengo que elem e (filter p ys)--> elem e ys es True por la HI
+
+
+	 	    Caso p y = False
+
+	 	    	elem e (if p y then y:(filter p ys) else filter p ys) = elem e (if False then y:(filter p ys) else filter p ys) 
+	 	    														  ={Bool} elem e (filter p ys)
+
+	 	        Luego tengo que elem e (filter p ys) --> elem e (y:ys) lo cual equivale a elem e (filter p ys) --> e==y || elem e ys. Por HI esto es True. 
+
+
+	 	    Probados ambos casos, vale P ∀xs::[a]
+
+
