@@ -253,10 +253,12 @@ que, dado un número y un polinomio, devuelve el resultado de evaluar el polinom
 data Polinomio a = X | Cte a | Suma (Polinomio a) (Polinomio a) | Prod (Polinomio a) (Polinomio a)
 
 foldPol::(a->b)->b->(b->b-> b)->(b->b-> b)->Polinomio a->b
-foldPol cCte cVar cSuma cProd  (Cte a)= cCte a
-foldPol cCte cVar cSuma cProd  X= cVar
-foldPol cCte cVar cSuma cProd  (Prod a b)= cProd (foldPol cCte cVar cSuma cProd a) (foldPol cCte cVar cSuma cProd b)
-foldPol cCte cVar cSuma cProd  (Suma a b)= cSuma (foldPol cCte cVar cSuma cProd a) (foldPol cCte cVar cSuma cProd b)
+foldPol cCte cVar cSuma cProd  p = case p of
+    (Cte a)-> cCte a
+    X -> cVar
+    (Prod a b)-> cProd (rec a) (rec b)
+    (Suma a b)-> cSuma (rec a) (rec b)
+    where rec = foldPol cCte cVar cSuma cProd
 
 evaluar::Num a=>a->Polinomio a->a
 evaluar n = foldPol id n (+) (*)
