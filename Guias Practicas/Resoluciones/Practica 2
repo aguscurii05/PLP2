@@ -1,0 +1,1111 @@
+Practica 2
+
+Ejercicio 1
+
+Sean las siguientes definiciones de funciones:
+
+	- {I} intercambiar (x,y) = (y,x)
+	- {E1} espejar (Left x) = Right x
+	  {E2} espejar (Right x) = Left x
+	- {AI} asociarI (x,(y,z)) = ((x,y),z)
+	- {AD} asociarD ((x,y),z) = (x,(y,z))
+	- {F} flip f x y = f y x
+	- {C} curry f x y = f (x,y)
+	- {UC} uncurry f (x,y) = f x y
+
+Demostrar las siguientes igualdades usando los lemas de generación cuando sea necesario:
+
+i. ∀ p::(a,b) . intercambiar (intercambiar p) = p
+
+	Por lema de generacion de pares existen x::a e y::b tal que p=(x,y)
+
+	intercambiar (intercambiar (x,y)) ={I} intercambiar (y,x) ={I} (x,y)
+
+
+
+
+ii. ∀ p::(a,(b,c)) . asociarD (asociarI p) = p
+
+
+	Por lema de generacion de pares existen x::a e x'::(b,c) tal que p=(x,y) y existen y::b y z::c tal que x'=(b,c), y entonces p=(x,(y,z))
+
+	asociarD (asociarI (x,(y,z))) ={AI} asociarD ((x,y),z) ={AD} (x,(y,z))
+
+
+
+
+iii. ∀ p::Either a b . espejar (espejar p) = p
+
+	Por lema de generacion de Either p= Left x con x::a o p= Right y con y::b
+
+	Caso p=Left x
+
+		espejar (espejar (Left x)) ={E1} espejar (Right x) ={E2} Left x
+
+	Caso p=Right y
+
+		espejar (espejar (Right y)) ={E2} espejar (Left y) ={E1} Right y
+
+
+
+
+iv. ∀ f::a->b->c . ∀ x::a . ∀ y::b . flip (flip f) x y = f x y
+
+
+	flip (flip f) x y ={F} (flip f) y x ={F} f x y
+
+
+
+
+v. ∀ f::a->b->c . ∀ x::a . ∀ y::b . curry (uncurry f) x y = f x y
+
+	curry (uncurry f) x y ={C} (uncurry f) (x,y) ={UC} f x y
+
+Ejercicio 2 ⋆
+
+Demostrar las siguientes igualdades utilizando el principio de extensionalidad funcional:
+
+	*Uso los defs anteriores
+
+	{COMP} (f . g) x = f (g x)
+	{F} flip f x y = f y x
+	{I} id x = x
+	{CONST} const x y = x
+
+i. flip . flip = id
+
+	Por extensionalidad, qvq ∀f::a->b ∀x::a.∀y::b  (flip.flip) f x y= id 
+
+	(flip. flip) f x y ={COMP} flip (flip f x y) ={F} flip f y x ={F} f x y
+
+
+
+
+
+ii. ∀ f::(a,b)->c . uncurry (curry f) = f
+
+	Por extensionalidad qvq ∀p::(a,b) uncurry (curry f) p = f p. Luego por lema de generacion de pares ∃x::a.∃y::b. p=(x,y)
+
+
+	uncurry (curry f) (x,y) ={UC} curry f x y ={C} f (x,y)
+
+
+
+
+
+iii. flip const = const id
+
+	Por extensionalidad quiero ver que ∀x::a.∀y::b flip const x y = const id x y
+
+	Izq:
+
+		flip const x y ={F} const y x={CONST} y
+
+	Der:
+
+		const id x y={asociatividad} (const id x) y ={CONST} id y ={I} y
+
+
+
+
+
+iv. ∀ f::a->b . ∀ g::b->c . ∀ h::c->d . ((h . g) . f) = (h . (g . f))
+
+
+	Por extensionalidad quiero ver que ∀x::a ((h.g).f) x = (h.(g.f)) x
+
+
+	Izq:
+
+		((h.g).f) x ={COMP} (h.g (f x)) ={COMP} h (g (f x))
+
+	Der:
+
+		(h. (g.f)) x ={COMP} h ((g.f) x) ={COMP} h (g (f x))
+
+
+
+Induccion sobre listas
+
+En esta sección usaremos las siguientes definiciones (y las de elem, foldr, foldl, map y filter vistas en clase):
+
+	{L0} length [] = 0
+	{L1} length (x:xs) = 1 + length xs
+	
+	{D0} duplicar [] = []
+	{D1} duplicar (x:xs) = x : x : duplicar xs
+	
+	
+	{++0} [] ++ ys = ys
+	{++1} (x:xs) ++ ys = x : (xs ++ ys)
+	
+	{A0} append xs ys = foldr (:) ys xs
+	
+	{R0} reverse = foldl (flip (:)) []
+
+	{E0} elem e [] = False
+	{E1} elem e (x:xs) = (e == x) || elem e xs
+	
+	{MAP} map f (x:xs) = foldr (\x->\r-> f x :r) [] (x:xs)
+
+	{FLT} filter f (x:xs) = foldr (\x->\r-> if f x then x:r else r) []
+
+	{FL0} foldl f ac [] = ac
+	{FL1} foldl f ac (x:xs) = foldl f (f ac x) xs
+
+	{FR0} foldr f z [] = z
+	{FR1} foldr f z (x:xs) = f x (foldr f z xs)	
+
+
+Ejercicio 3 ⋆
+
+Demostrar las siguientes propiedades:
+
+i. ∀ xs::[a] . length (duplicar xs) = 2 * length xs
+
+	P(xs) = length (duplicar xs) = 2 * length xs
+
+	Lo veo por induccion sobre xs::[a]
+
+	Caso xs=[]
+
+		length (duplicar []) ={D0} length [] ={L0} 0 ={Int} 2*0 = {L0} 2 * length []
+
+
+	Caso xs=y:ys con y::a e ys::[a]
+
+		Asumo como HI P(ys). Qvq vale P(y:ys)
+
+		length (duplicar (y:ys)) = length (y:y:duplicar ys) = {L1} 1+ length (y:duplicar ys) = {L1} 1 + 1 + length (duplicar ys) = {HI} 1 + 1 + 2* length ys = {Int} 2 + 2* length ys ={Int} 2 * (1+length ys) = {L1} 2* length (y:ys)
+
+		Asi queda probado el caso xs=y:ys
+
+	Probados ambos casos queda probada la propiedad P ∀xs::[a]
+
+
+
+
+
+
+
+
+
+ii. ∀ xs::[a] . ∀ ys::[a] . length (xs ++ ys) = length xs + length ys
+
+
+	P(xs) = ∀ys::[a]. length (xs ++ ys) = length xs + length ys
+
+	Lo veo por induccion en xs::[a]
+
+	Caso xs = []
+
+		length ([] ++ ys) ={++0} length ys ={Int} 0 + length ys = {L0} length [] + length ys
+
+	Caso xs=z:zs
+
+		Asumo como HI P(zs). Qvq vale P(z:zs)
+
+		length ((z:zs)++ys) ={++1} length (x: (zs++ys)) ={L1} 1 + length (zs++ys) ={HI} 1 + length zs + length ys ={L1} length (z:zs) + length ys
+
+	Probados ambos casos, queda probada la propiedad P ∀xs::[a]
+
+
+iii. ∀ xs::[a] . ∀ x::a . [x] ++ xs = x:xs
+
+	Lo veo por induccion en xs 
+
+	Caso xs=[]
+
+		[x] ++ [] ={++1} x:([]++[]) ={++0} x:[]
+
+
+	Caso xs=y:ys
+
+		(x:[]) ++ (y:ys) ={++1} x:([]++(y:ys)) ={++0}  x:(y:ys)
+
+
+	Probados ambos casos, queda probada la propiedad P ∀xs::[a]
+	
+
+iv. ∀ xs::[a] . xs ++ [] = xs
+
+
+	Lo veo por induccion en xs
+
+	Caso xs=[]
+
+		[]++[]={++0} []
+
+	Caso xs=y:ys
+
+		Asumo como HI P(ys). Qvq vale P(y:ys)
+
+		(y:ys) ++ [] ={++1} y: (ys++[]) ={HI} y:ys
+
+
+	Probados ambos casos, queda probada la propiedad P ∀xs::[a]
+
+
+v. ∀ xs::[a] . ∀ ys::[a] . ∀ zs::[a] . (xs ++ ys) ++ zs = xs ++ (ys ++ zs)
+
+	Lo veo por induccion en xs
+
+	Caso xs=[]
+
+		([]++ys)++zs ={++0} ys++zs ={++0} [] ++ (ys++zs)
+
+
+	Caso xs = m:ms
+
+		Asumo como HI P(ys). Qvq vale P(y:ys)
+		
+		((m:ms) ++ ys) ++ zs ={++1} (m:(ms ++ ys)) ++ zs ={++1} m: ((ms ++ ys) ++ zs) ={HI} m:(ms ++ (ys ++ zs)) ={++1} (m:ms) ++ (ys ++ zs)
+
+
+	Probados ambos casos, queda probada la propiedad P ∀xs::[a]
+
+
+
+vi. ∀ xs::[a] . ∀ f::(a->b) . length (map f xs) = length xs
+
+	Lo veo por induccion en xs
+
+	Caso xs=[]
+
+		length (map f []) ={M} length (foldr (\x->\r-> f x :r) [] []) ={FR0} length []
+
+
+	Caso xs=(y:ys)
+
+		Asumo como HI P(ys). Qvq vale P(y:ys)
+
+		length (map f (y:ys)) ={MAP} length (foldr (\x->\r-> f x :r) [] (y:ys)) 
+							  ={FR1} length ((\x->\r-> f x :r) y (foldr (\x->\r-> f x :r) [] ys))
+							  ={MAP} length ((\x->\r-> f x :r) y (map f ys))
+							  ={Beta} length (y:map f ys) 
+							  ={L1} 1 + length (map f ys)
+							  ={HI} 1 + length ys
+							  ={L1} length (y:ys)
+
+	Probados ambos casos, queda probada la propiedad P ∀xs::[a]
+
+
+vii. ∀ xs::[a] . ∀ p::a->Bool . ∀ e::a . (elem e (filter p xs) ⇒ elem e xs) (si vale Eq a)
+
+	P(xs) = ∀ p::a->Bool . ∀ e::a . (elem e (filter p xs) ⇒ elem e xs)
+
+	Lo veo por induccion en xs
+
+	Caso xs = []
+
+		Antecedente:
+
+		elem e (filter p []) ={FLT} elem e (foldr (\x->\r-> if p x then x:r else r) [] [])
+							 ={FR0} elem e []
+							 ={E0} False
+
+		Consecuente: 
+
+		elem e [] ={E0} False
+
+		Luego, False -> False es True por Bool
+
+
+
+	Caso xs= (y:ys)
+
+		Asumo como HI P(ys). Qvq vale P(y:ys)
+
+		Antecedente:
+
+		elem e (filter p (y:ys)) ={FLT} elem e (foldr (\x->\r-> if p x then x:r else r) [] (y:ys))
+								 ={FR1} elem e ((\x->\r-> if p x then x:r else r) y (foldr (\x->\r-> if p x then x:r else r) [] ys))
+								 ={FLT} elem e ((\x->\r-> if p x then x:r else r) y (filter p ys))
+								 ={Beta} elem e (if p y then y:(filter p ys) else filter p ys)
+
+
+	 	Por lema de generacion de Bool p y es True o False
+
+	 		Caso p y = True
+
+	 			elem e (if p y then y:(filter p ys) else filter p ys) = elem e (if True then y:(filter p ys) else filter p ys) 
+	 														          ={Bool} elem e (y:(filter p ys))
+	 														          ={E1} e==y || elem e (filter p ys)
+
+	 	    	Por lema de generacion de Bool e==y es True o False
+
+	 	    	Caso e==y = True
+
+	 	    		e==y || elem e (filter p ys) = True || elem e (filter p ys)
+	 	    									 ={Bool} True
+
+
+	 	    		Veo el consecuente:
+
+	 	    			elem e (y:ys) ={E1} e==y || elem e ys
+	 	    						  = True || elem e ys
+	 	    						  ={Bool} True
+
+	 	    		Luego True -> True es True por Bool
+
+	 	    	Caso e==y = False
+
+	 	    		e==y || elem e (filter p ys) = False || elem e (filter p ys)
+	 	    									 ={Bool} elem e (filter p ys)
+
+	 	    		Veo el consecuente:
+
+	 	    			elem e (y:ys)={E1} e==y || elem e ys 
+	 	    						 = False || elem e ys
+	 	    						 ={Bool} elem e ys
+
+	 	    		Asi tengo que elem e (filter p ys)--> elem e ys es True por la HI
+
+
+	 	    Caso p y = False
+
+	 	    	elem e (if p y then y:(filter p ys) else filter p ys) = elem e (if False then y:(filter p ys) else filter p ys) 
+	 	    														  ={Bool} elem e (filter p ys)
+
+	 	        Luego tengo que elem e (filter p ys) --> elem e (y:ys) lo cual equivale a elem e (filter p ys) --> e==y || elem e ys. Por HI esto es True. 
+
+
+	 	    Probados ambos casos, vale P ∀xs::[a]
+
+Ejercicio 4 ⋆
+
+Demostrar las siguientes propiedades:
+
+	{R0} reverse = foldl (flip (:)) []
+
+
+i. reverse = foldr (\x rec -> rec ++ (x:[])) []
+
+	Por extensionalidad, quiero ver que vale la igualdad ∀xs::[a]. De esta manera quiero probar ∀xs::[a]:
+
+		P(xs) = reverse = foldr (\x rec -> rec ++ (x:[])) []
+
+	Lo veo por induccion en la estructura de xs
+
+	Caso xs = []
+
+		reverse []={R0} foldl (flip (:)) [] []={FL0} []
+
+		foldr (\x rec-> rec++ (x:[])) [] [] ={FR0} []
+
+		Asi, queda probado el caso base
+
+	Caso xs=(y:ys)
+
+		Asumo como HI P(ys). Quiero ver que P(ys)-->P(y:ys)
+
+		Lado izquierdo:
+
+		reverse (y:ys) ={R0} foldl (flip (:)) [] (y:ys) 
+					   ={FL1} foldl (flip (:)) ((flip (:)) [] y) ys
+					   ={F} foldl (flip (:)) ((:) y []) ys
+					   ={(:)} foldl (flip (:)) [y] ys
+					   ={Lema} reverse ys ++ [y]
+					   ={(:)} reverse ys ++ (y:[])
+					   ={Beta x 2} (\x rec-> rec++ (x:[])) y (reverse ys)
+					   ={HI} (\x rec-> rec++ (x:[])) y (foldr (\x rec-> rec++ (x:[])) [] ys)
+					   ={FR1} foldr (\x rec-> rec++ (x:[])) [] (y:ys)
+												
+		{Lema} 
+		
+		Qvq foldl (flip (:)) ls ys = reverse ys ++ ls ∀ys,ls::[a]
+
+			P(ys) = ∀ls::[a]. foldl (flip (:)) ls ys = reverse ys ++ ls
+
+		Caso ys=[]
+
+			foldl (flip (:)) [y] [] ={FL0} []
+
+			reverse [] ++ [y] ={R0} foldl (flip (:)) [] [] ++[y] = {FL0} [] ++ [y] ={++0} [y]
+
+		Caso ys = (z:zs)
+
+			Asumo como hipotesis inductiva P(zs). Qvq P(zs)-->P(z:zs)
+
+				foldl (flip (:)) [y] (z:zs) = {FL1} foldl (flip (:)) (flip (:) [y] z) zs 
+										    = {F} foldl (flip (:)) ((:) z [y]) zs 
+										    = {(:)} foldl (flip (:)) [z,y] zs 
+											= {HI} reverse zs ++ [z,y]
+											= {(:)} reverse zs ++ z:[y]
+											= {++0} reverse zs ++ z:( []++[y])
+											= {++1} reverse zs ++ [z] ++ [y]
+											= {HI} foldl (flip (:)) [z] zs ++ [y]
+											= {(:)} foldl (flip (:)) ((:) z []) zs ++ [y]
+											= {F} foldl (flip (:)) (flip (:) [] z) zs ++ [y]
+											= {FL1} foldl (flip (:)) [] (z:zs) ++ [y]
+											= {R0} reverse (z:zs) ++ [y]
+
+
+
+
+ii. ∀ xs::[a] . ∀ ys::[a] . reverse (xs ++ ys) = reverse ys ++ reverse xs
+
+	P(xs) = ∀ys::[a] reverse (xs ++ ys) = reverse ys ++ reverse xs
+
+	Lo pruebo por induccion en xs
+
+	Caso xs=[]
+
+		reverse ys ++ reverse [] ={R0} reverse ys ++ foldl (flip (:)) [] [] 
+								 ={FL0} reverse ys ++ [] 
+								 ={3 iv} reverse ys
+								 ={++0} reverse ([] ++ ys)
+
+	Caso xs=z:zs
+
+		Asumo como hipotesis inductiva P(zs). Qvq P(zs)-->P(z:zs)
+
+		reverse ((z:zs)++ys) ={++1} reverse (z:(zs++ys)) 
+							 = {R0} foldl (flip (:)) [] (z:(zs++ys))
+							 = {FL1} foldl (flip (:)) (flip (:) [] z) (zs++ys)
+							 = {F} foldl (flip (:)) ((:) z []) (zs++ys)
+							 = {(:)} foldl (flip (:)) [z] (zs++ys)
+							 = {Lema} reverse (zs++ys) ++ [z]
+							 = {HI} reverse ys ++ reverse zs ++ [z]
+							 = {Lema} reverse ys ++ foldl (flip (:)) [z] zs
+							 = {(:)} reverse ys ++ foldl (flip (:)) ((:) z []) zs
+							 = {F} reverse ys ++ foldl (flip (:)) (flip (:) [] z) zs
+							 = {FL1} reverse ys ++ foldl (flip (:)) [] (z:zs)
+							 = {R0} reverse ys ++ reverse (z:zs)
+
+		Probados ambos casos, queda probado P(ys) ∀ys::[a]
+
+
+iii. ∀ xs::[a] . ∀ x::a . reverse (xs ++ [x]) = x:reverse xs
+
+	P(xs) = ∀ x::a . reverse (xs ++ [x]) = x:reverse xs
+
+	Qvq que P(xs) vale ∀xs::[a]. Lo pruebo por induccion en xs
+
+	Caso xs = []
+
+		Voy a usar como {R[]} el siguiente resultado
+
+		reverse [] ={R0} foldl (flip (:)) [] [] ={FL0} []
+
+		reverse ([]++[x]) = {++0} reverse [x] 
+						  = {R0} foldl (flip (:)) [] [x]
+						  = {FL1} foldl (flip (:)) (flip (:) [] x) []
+						  = {F} foldl (flip (:)) ((:) x []) []
+						  = {(:)} foldl (flip (:)) [x] []
+						  = {Lema} reverse [] ++ [x]
+						  = {R[]} [] ++ [x]
+						  = {++0} [x]
+						  = x:[]
+						  = {R0} x:reverse []
+
+	Caso ys=z:zs
+
+		Asumo como hipotesis inductiva P(zs). Qvq P(zs)-->P(z:zs)
+
+		Uso como {R[x]} que reverse [x] = [x], ya que se probo en el caso xs=[]
+
+		reverse (z:zs ++ [x]) ={++0} reverse (z:(zs++[x]))
+							  ={R0} foldl (flip (:)) [] (z:(zs++[x]))
+						  	  = {FL1} foldl (flip (:)) (flip (:) [] z) (zs++[x])
+						  	  = {F} foldl (flip (:)) ((:) z []) (zs++[x])
+						  	  = {(:)} foldl (flip (:)) [z] (zs++[x])
+						  	  = {Lema} reverse (zs++[x]) ++ [z]
+							  = {4 ii} reverse [x] ++ reverse zs ++ [z]
+							  = {R[x]} [x] ++ reverse zs ++ [z]
+							  = {Lema} [x] ++ foldl (flip (:)) [z] zs
+							  = {(:)} [x] ++ foldl (flip (:)) ((:) z []) zs
+							  = {F} [x] ++ foldl (flip (:)) (flip (:) [] z) zs
+							  = {FL1} [x] ++ foldl (flip (:)) [] (z:zs)
+							  = {R0} [x] ++ reverse (z:zs)
+							  = {++1} x:([] ++ reverse (z:zs))
+							  = {++0} x: reverse (z:zs)
+
+Ejercicio 6 ⋆
+
+Dadas las siguientes funciones:
+
+zip :: [a] -> [b] -> [(a,b)]
+{Z0} zip = foldr (\x rec ys -> if null ys then [] else (x, head ys) : rec (tail ys)) (const [])
+
+
+zip' :: [a] -> [b] -> [(a,b)]
+{Z'0} zip' [] ys = []
+{Z'1} zip' (x:xs) ys = if null ys then [] else (x, head ys):zip' xs (tail ys)
+Demostrar que zip = zip' utilizando inducción estructural y el principio de extensionalidad.
+
+	Por extensionalidad, qvq ∀xs,ys::[a] zip xs ys = zip' xs ys. Para eso planteo:
+
+		P(xs) = ∀ys::[a]. zip xs ys = zip' xs ys
+
+	Caso P([])
+
+		zip [] ys = {Z0} foldr (\x rec ys -> if null ys then [] else (x, head ys) : rec (tail ys)) (const []) [] ys
+				  = {FR0} const [] ys
+				  = {Const} []
+				  = {Z'0} zip' [] ys
+
+	Caso P(z:zs)
+
+		Asumo como hipotesis inductiva P(zs). Qvq P(zs)-->P(z:zs)
+
+		zip (z:zs) ys 
+		={Z0} foldr (\x rec ys -> if null ys then [] else (x, head ys) : rec (tail ys)) (const []) (z:zs) ys
+		={FR1} (\x rec ys -> if null ys then [] else (x, head ys) : rec (tail ys)) z (foldr (\x rec ys -> if null ys then [] else (x, head ys) : rec (tail ys)) (const []) zs) ys
+		={Z0} (\x rec ys -> if null ys then [] else (x, head ys) : rec (tail ys)) z (zip zs) ys
+		={Beta x3} if null ys then [] else (z, head ys) : (zip zs) (tail ys)
+
+	    Por lema de generacion de listas, ys=[] o ys=(t:ts)
+
+		Caso ys = []
+
+			if null [] then [] else (z, head []) : (zip zs) (tail []) 
+			= {Null} if True then [] else (z, head []) : (zip zs) (tail [])
+			= {If_True} []
+
+			zip' (z:zs) []  ={Z'1} if null [] then [] else (z, head []):zip' zs (tail [])
+							={Null} if True then [] else (z, head []):zip' zs (tail [])
+							={If-true} []
+
+			Luego queda probado el paso inductivo para ys = []
+
+		Caso ys = (t:ts)
+
+			if null (t:ts) then [] else (z, head (t:ts)) : (zip zs) (tail (t:ts))
+			= {Null} if False then [] else (z, head (t:ts)) : (zip zs) (tail (t:ts))
+			= {IfFalse} (z, head (t:ts)) : (zip zs) (tail (t:ts))
+			= {Head,Tail} (z,t) : (zip zs ts)
+			= {HI} (z,t):zip' zs ts
+			= {Head,Tail} (z,head (t:ts)):zip' zs (tail (t:ts))
+			= {IfFalse} if False then [] else (z, head (t:ts)):zip' zs (tail (t:ts))
+			= {IfFalse} if null (t:ts) then [] else (z, head (t:ts)):zip' zs (tail (t:ts))
+			= {Z'1} zip' (z:zs) (t:ts)
+
+
+Ejercicio 7 ⋆
+Dadas las siguientes funciones:
+
+nub :: Eq a => [a] -> [a]
+{N0} nub [] = []
+{N1} nub (x:xs) = x : filter (\y -> x /= y) (nub xs)
+
+union :: Eq a => [a] -> [a] -> [a]
+{U0} union xs ys = nub (xs++ys)
+
+intersect :: Eq a => [a] -> [a] -> [a]
+{I0} intersect xs ys = filter (\e -> elem e ys) xs
+
+Y la siguiente propiedad que vale para todos los tipos a y b pertenecientes a la clase Eq:
+
+{CONGRUENCIA ==} ∀ x::a . ∀ y::a . ∀ f::a->b . (a == b ⇒ f a == f b)
+
+Indicar si las siguientes propiedades son verdaderas o falsas. Si son verdaderas, realizar una demostración.
+Si son falsas, presentar un contraejemplo.
+
+	{E0} elem e [] = False
+	{E1} elem e (x:xs) = (e == x) || elem e xs
+
+	{FLT} filter f (x:xs) = foldr (\x->\r-> if f x then x:r else r) []
+
+i. Eq a => ∀ xs::[a] . ∀ e::a . ∀ p::a -> Bool . elem e xs && p e = elem e (filter p xs)
+
+	P(xs) = ∀ e::a . ∀ p::a -> Bool . elem e xs && p e = elem e (filter p xs)
+
+
+	Qvq P(xs) vale ∀xs::[a]. Lo pruebo por induccion en xs
+
+	Caso P([])
+
+
+		elem e [] && p e = {E0} False && p e 
+						 = {Bool} False
+						 ={E0} elem e []
+						 ={FR0} elem e foldr (\x->\r-> if p x then x:r else r) [] []
+						 = {FLT} elem e (filter p [])
+	
+	Caso P(y:ys)
+
+		Asumo como HI P(ys). Qvq P(ys)->P(y:ys)
+
+		Izq:
+
+		elem e (y:ys) && p e ={E1} e==y || elem e ys && p e
+
+		Der:
+
+		elem e (filter p (y:ys)) = {FLT} elem e (foldr (\x->\r-> if p x then x:r else r) [] (y:ys))
+								 = {FR1} elem e ((\x->\r-> if p x then x:r else r) y (foldr (\x->\r-> if p x then x:r else r) [] ys))
+								 = {FLT} elem e ((\x->\r-> if p x then x:r else r) y (filter p ys))
+								 = {Beta x2} elem e (if p y then y:(filter p ys) else (filter p ys))
+
+		Asi, tengo lo siguiente:
+
+			e==y || elem e ys && p e = elem e (if p y then y:(filter p ys) else (filter p ys))
+
+		Por LG bool p y es True o False
+
+		Caso p y = False
+
+					  (e==y || elem e ys) && p e = elem e (if False then y:(filter p ys) else (filter p ys))
+			{IfFalse} (e==y || elem e ys) && p e = elem e (filter p ys)
+			{HI} (e==y || elem e ys) && p e = elem e ys && p e
+
+			Por lema de generacion de bool e==y es True o False
+
+			Caso e==y True
+
+				(True || elem e ys) && p e = elem e ys && p e
+				={Bool} True && p e = elem e ys && p e
+				={CONGRUENCIA ==} True && False = elem e ys && False
+				={Bool x 2} False = False
+
+				Lo cual es cierto
+			
+			Caso e==y False
+
+				(False || elem e ys) && p e = elem e ys && p e
+				={Bool} elem e ys && p e = elem e ys && p e
+
+				Luego al ser exactamente la misma expresion, es cierta la igualdad
+
+		Caso p y = True
+
+					 e==y || elem e ys && p e = elem e (if True then y:(filter p ys) else (filter p ys))
+			{IfTrue} e==y || elem e ys && p e = elem e y:(filter p ys)
+			{E1} e==y || elem e ys && p e = e== y || elem e (filter p ys)
+			{HI} e==y || elem e ys && p e = e== y || elem e ys && p e
+
+				Luego al ser exactamente la misma expresion, es cierta la igualdad
+
+ii. Eq a => ∀ xs::[a] . ∀ e::a . elem e xs = elem e (nub xs)
+
+	P(xs) = ∀ e::a . elem e xs = elem e (nub xs)
+
+	Qvq P(xs) vale ∀xs::[a]. Lo pruebo por induccion en xs
+	
+	Caso P([])
+
+		elem e [] ={N0}  elem e (nub [])
+
+	Caso P(y:ys)
+
+		Asumo como HI P(ys). Qvq P(ys)->P(y:ys)
+
+			 elem e (y:ys) = elem e (nub (y:ys))
+		{E1,N1} e==y || elem e ys = elem e (y : filter (\z -> y /= z) (nub ys))
+		{E1} e==y || elem e ys = e==y || elem e (filter (\z -> y /= z) (nub ys))
+
+		Por LG Bool e==y es True o False
+
+		Caso e==y = True
+
+			True || elem e ys = True || elem e (filter (\z -> y /= z) (nub ys))
+			={Bool x 2} True = True
+
+		Caso e==y = False
+
+			False || elem e ys = False || elem e (filter (\z -> y /= z) (nub ys))
+			={Bool x 2} elem e ys = elem e (filter (\z -> y /= z) (nub ys))
+			={HI} elem e (nub ys) = elem e (filter (\z -> y /= z) (nub ys))
+
+		Por (i) si vale (\z -> y/= z) e entonces vale la proposicion. Veamos que por Beta (\z -> y/= z) e = y/=e
+		lo cual es cierto pues e==y = False es identico a decir e/=y = True. Por lo tanto vale la igualdad
+
+
+
+iii. Eq a => ∀ xs::[a] . ∀ ys::[a] . ∀ e::a . elem e (union xs ys) = (elem e xs) || (elem e ys)
+
+	P(xs) = ∀ ys::[a] . ∀ e::a . elem e (union xs ys) = (elem e xs) || (elem e ys)
+
+	Qvq P(xs) vale ∀xs::[a]. Lo pruebo por induccion en xs
+	
+	Caso P([])
+
+		elem e (union [] ys) = (elem e []) || (elem e ys)
+		={U0,E0} elem e (nub ([] ++ ys)) = False || (elem e ys)
+		={++0,Bool} elem e (nub ys) = elem e ys
+
+		Vale por (ii)
+
+	Caso P(z:zs)
+
+		Asumo como HI P(ys). Qvq P(ys)->P(y:ys)
+
+		elem e (union (z:zs) ys) = (elem e (z:zs)) || (elem e ys)
+		{U0,E0} 	                   elem e (nub ((z:zs) ++ ys)) = e==z || elem e zs || elem e ys
+		{++1}                           elem e (nub (z:(zs++ ys))) = e==z || elem e zs || elem e ys
+		{N1}     elem e (z : filter (\t -> z /= t) (nub (zs++ys))) = e==z || elem e zs || elem e ys
+		{E1} e==z || elem e (filter (\t -> z /= t) (nub (zs++ys))) = e==z || elem e zs || elem e ys
+
+		Por LG de bool, e==z es True o False
+
+		Caso e==z = True
+
+		True || elem e (filter (\t -> z /= t) (nub (zs++ys))) = True || elem e zs || elem e ys
+		={Bool} True = True
+
+		Caso e==z = False
+
+				False || elem e (filter (\t -> z /= t) (nub (zs++ys))) = False || elem e zs || elem e ys
+		={Bool}          elem e (filter (\t -> z /= t) (nub (zs++ys))) = elem e zs || elem e ys
+		={U0}         	  elem e (filter (\t -> z /= t)) (union zs ys) = elem e zs || elem e ys
+		={(i)}                    elem e (union zs ys) && (\t -> z/=t) e = elem e zs || elem e ys
+		={Beta}                    elem e (union zs ys) && z/= e = elem e zs || elem e ys
+		={e==z = False}            elem e (union zs ys) && True = elem e zs || elem e ys
+		={Bool}            				   elem e (union zs ys) = elem e zs || elem e ys
+
+		Luego esto es valido por HI
+
+
+{I0} intersect xs ys = filter (\e -> elem e ys) xs
+
+
+iv. Eq a => ∀ xs::[a] . ∀ ys::[a] . ∀ e::a . elem e (intersect xs ys) = (elem e xs) && (elem e ys)
+
+	P(xs) = ∀ ys::[a] . ∀ e::a . elem e (intersect xs ys) = (elem e xs) && (elem e ys)
+
+	Qvq P(xs) vale ∀xs::[a]. Lo pruebo por induccion en xs
+	
+	Caso P([])
+
+		elem e (intersect [] ys) ={I0} elem e (filter (\e -> elem e ys) [])
+								 ={FLT} elem e foldr (\x->\r-> if (\e -> elem e ys) x then x:r else r) [] []
+								 ={FR0} elem e []
+								 ={E0} False
+								 ={Bool} False && elem e ys
+								 ={E0} elem e [] && elem e ys
+
+	Caso P(z:zs)
+
+		Asumo como HI P(ys). Qvq P(ys)->P(y:ys)
+
+		elem e (intersect (z:zs ys)) ={I0} elem e (filter (\e -> elem e ys) (z:zs))
+									 ={FLT} elem e foldr (\x->\r-> if (\e -> elem e ys) x then x:r else r) [] (z:zs)
+									 ={FR1} elem e ((\x->\r-> if (\e -> elem e ys) x then x:r else r) z (foldr (\x->\r-> if (\e -> elem e ys) x then x:r else r) [] zs))
+									 ={FLT} elem e ((\x->\r-> if (\e -> elem e ys) x then x:r else r) z (filter (\e -> elem e ys) zs))
+									 ={Beta x2} elem e (if (\e -> elem e ys) z then x:(filter (\e -> elem e ys) zs) else (filter (\e -> elem e ys) zs))
+									 ={Beta} elem e (if (elem z ys) then z:(filter (\e -> elem e ys) zs) else (filter (\e -> elem e ys) zs))
+
+	    Por LG Bool elem z ys es True o False
+
+		Caso elem z ys = True
+
+			elem e (if True then z:(filter (\e -> elem e ys) zs) else (filter (\e -> elem e ys) zs))
+
+			={ifTrue} elem e (z:(filter (\e -> elem e ys) zs))
+			={E1} e==z || elem e (filter (\e -> elem e ys) zs)
+
+
+			Por LG Bool e==z es True o False
+
+			Caso e== z True
+
+				Tenemos hasta ahora que 
+
+										e==z || elem e (filter (\e -> elem e ys) zs) = (elem e (z:zs)) && (elem e ys)
+					{E1} 				e==z || elem e (filter (\e -> elem e ys) zs) = e==z || elem e zs && (elem e ys)
+					{e==z = True, e==z} True || elem e (filter (\e -> elem e ys) zs) = (True || elem z zs) && (elem z ys)
+					{Bool x2, elem z ys = True} 									True = True && True
+					{Bool} 															True = True
+
+			Caso e==z False
+
+				Tenemo hasta ahora que:
+
+								e==z || elem e (z:(filter (\e -> elem e ys) zs)) = (elem e (z:zs)) && (elem e ys)
+					{E1} 			e==z || elem e (filter (\e -> elem e ys) zs) = (e==z || elem e zs) && (elem e ys)
+					{e==z = False} False || elem e (filter (\e -> elem e ys) zs) = (False || elem e zs) && (elem e ys)
+					{Bool x2}               elem e (filter (\e -> elem e ys) zs) = elem e zs && (elem e ys)
+					{(i)} 						elem e zs && (\e -> elem e ys) e = elem e zs && (elem e ys)
+					{Beta} 							      elem e zs && elem e ys = elem e zs && elem e ys
+
+		Caso elem z ys = False
+
+			elem e (if False then z:(filter (\e -> elem e ys) zs) else (filter (\e -> elem e ys) zs))
+			{ifFalse} elem e (filter (\e -> elem e ys) zs)
+			{I0} elem e (intersect zs ys)
+
+			Luego hasta ahora tenemos que 
+
+				  elem e (intersect zs ys) = elem e (z:zs) && elem e ys
+			{E1,HI} elem e zs && elem e ys = (e==z || elem e zs) && elem e ys
+
+			Por LG Bool, e==z es True o False
+
+			Caso e==z True
+
+								elem e zs && elem e ys = (e==z || elem e zs) && elem e ys
+				{e==z True} 	elem e zs && elem e ys = (True || elem e zs) && elem e ys
+				{Bool} 			elem e zs && elem e ys = True && elem e ys
+				{Bool} 			elem e zs && elem e ys = elem e ys
+				{e==z} 			elem z zs && elem z ys = elem z ys
+				{elem z ys = False} elem z zs && False = False
+				{Bool} 							 False = False
+
+				Lo cual es cierto
+
+			Caso e==z False
+
+								elem e zs && elem e ys = (e==z || elem e zs) && elem e ys
+				{e==z = False}  elem e zs && elem e ys = (False || elem e zs) && elem e ys
+				{Bool} 			elem e zs && elem e ys = elem e zs && elem e ys
+
+				Luego esto es cierto pues las expresiones son iguales
+
+	Probados ambos casos, vale P(xs) ∀xs::[a]
+
+v. Eq a => ∀ xs::[a] . ∀ ys::[a] . length (union xs ys) = length xs + length ys
+
+	Esta propiedad es falsa. Por ejemplo, con xs= [1] e ys = [1]:
+
+	length (union [1] [1]) ={U0} length (nub [1] ++ [1]) 
+						   ={++1} length (nub 1:([] ++ [1])) 
+						   ={++0} length (nub 1:[1])
+						   ={(:)} length (nub [1,1])
+						   ={N0} length (1:filter (\y -> 1/= y) [1])
+						   (...)
+						   =length [1]
+						   = 1
+
+	Pero length [1] ++ length [1] es 2
+
+
+
+
+vi. Eq a => ∀ xs::[a] . ∀ ys::[a] . length (union xs ys) ≤ length xs + length ys
+
+	P(xs) = ∀ ys::[a] . length (union xs ys) <= length xs + length ys
+
+	Qvq vale P(xs) ∀xs::[a]. Lo pruebo por induccion en la estructura de xs
+
+	Caso P([])
+
+		length (union [] ys) <={U0} length (nub ([] ++ ys))
+							 <={++0} length (nub ys)
+							 <={Lema 2} length ys
+							 <={Int} 0 + length ys
+							 <={L0} length [] + length ys
+
+	Caso P(z:zs)
+	
+		Asumo como HI P(zs). Qvq P(ys)->P(z:zs)
+
+		length (union (z:zs) ys) ={U0} length (nub ((z:zs)++ys))
+								 ={++1} length (nub (z:(zs++ys)))
+								 ={N1} length (x: filter (\t -> x/=t) (nub (zs++ys)))
+								 ={L1} 1+ length filter (\t -> x/=t) (nub (zs++ys))
+								 ={U0} 1+ length filter (\t -> x/=t) (union zs ys)
+								 <={Lema} 1 + length (union zs ys)
+								 <={HI} 1 + length zs + length ys
+								 ={L1} length (z:zs) + length ys
+
+	{Lema}
+
+		M(xs) =∀p::a->Bool length filter p xs <= length xs
+
+		Qvq M(xs) vale ∀xs::[a]. Lo veo por induccion en xs
+
+		M([])
+
+		length (filter p []) ={FLT} length (foldr (\x->\r-> if p x then x:r else r) [] [])
+							 ={FR1} length []
+
+		M(y:ys)
+
+		Asumo M(ys). Qvq M(ys)-->M(y:ys)
+
+		length (filter p (y:ys)) ={FLT} length (foldr (\x->\r-> if p x then x:r else r) [] (y:ys))
+								 ={FR1} length ((\x->\r-> if p x then x:r else r) y (foldr (\x->\r-> if p x then x:r else r) [] ys))
+								 ={FLT} length ((\x->\r-> if p x then x:r else r) y (filter p ys))
+								 ={Beta x2} length (if p y then y:(filter p ys) else (filter p ys))
+
+
+		Por LG bool p y es True o False						 
+
+		Caso True
+
+			length (if True then y:(filter p ys) else (filter p ys)	)
+			={if} length (y:filter p ys)
+			={L1} 1 + length (filter p ys)
+			<={HI} 1+ length ys
+			={L1} length (y:ys)
+
+		Caso False
+
+			length (if False then y:(filter p ys) else (filter p ys))
+			={if} length (filter p ys)
+			<={Int} 1 + length (filter p ys)
+			<={HI} 1+ length ys
+			={L1} length (y:ys)
+
+
+		Probados ambos casos, vale el lema ∀xs::[a]
+
+	{Lema 2}
+
+		Q(xs) = length (nub xs) <= length xs
+
+		Qvq Q(xs) vale ∀xs::[a]. Lo veo por induccion
+
+		Q([])
+
+			length (nub []) ={N0} length []
+
+		Q(y:ys)
+
+			Asumo Q(ys). Qvq Q(ys)-->Q(y:ys)
+
+			length (nub (y:ys)) ={N1} length (y:filter (\t->y/= t) ys)
+								={L1} 1 + length (filter (\t->y/= t) ys)
+								<={Lema} 1+ length ys
+								={L1} length (y:ys)
+
+
+
+Ejercicio 13 ⋆
+
+Dados el tipo Polinomio y su esquema de recursión estructural foldPoli definidos en la práctica 1, y las
+siguientes funciones:
+
+evaluar :: Num a => a -> Polinomio a -> a
+{E} evaluar n = foldPoli n id (+) (*)
+
+derivado :: Num a => Polinomio a -> Polinomio a
+{D} derivado poli = case poli of
+	X -> Cte 1
+	Cte _ -> Cte 0
+	Suma p q -> Suma (derivado p) (derivado q)
+	Prod p q -> Suma (Prod (derivado p) q) (Prod (derivado q) p)
+
+sinConstantesNegativas :: Num a => Polinomio a -> Bool
+{S} sinConstantesNegativas = foldPoli True (>=0) (&&) (&&)
+
+esRaiz :: Num a => a -> Polinomio a -> Bool
+{ER} esRaiz n p = evaluar n p == 0
+
+foldPoli::(a->b)->b->(b->b-> b)->(b->b-> b)->Polinomio a->b
+{FP} foldPoli cCte cVar cSuma cProd  p = case p of
+    X -> cVar
+    (Cte a)-> cCte a
+    (Prod a b)-> cProd (rec a) (rec b)
+    (Suma a b)-> cSuma (rec a) (rec b)
+    where rec = foldPoli cCte cVar cSuma cProd
+
+Demostrar las siguientes propiedades:
+i. Num a => ∀ p::Polinomio a . ∀ q::Polinomio a . ∀ r::a . (esRaiz r p ⇒ esRaiz r (Prod p q))
+
+	P(p) = ∀ q::Polinomio a . ∀ r::a . (esRaiz r p ⇒ esRaiz r (Prod p q))
+
+	Qvq P(p) ∀p::Polinomio a. 
+
+	Sean q y r un polinomio y un valor cualesquiera veamos que:
+
+			  esRaiz r p ⇒ esRaiz r (Prod p q)
+		evaluar r p == 0 ⇒ evaluar r (Prod p q) == 0
+		evaluar r p == 0 ⇒ foldPoli r id (+) (*) (Prod p q) == 0
+		evaluar r p == 0 ⇒ (case (Prod p q) of ...) == 0
+		evaluar r p == 0 ⇒ (foldPoli r id (+) (*) p * foldPoli r id (+) (*) q) == 0
+		evaluar r p == 0 ⇒ (evaluar r p * evaluar r q) == 0
+
+		Luego por LG bool evaluar r p == 0 es True o False
+
+		Caso False
+
+			False ⇒ (evaluar r p * evaluar r q) == 0
+
+			Esto es valido por bool
+
+		Caso True
+
+			True ⇒ (0 * evaluar r q) == 0
+			True ⇒ 0 == 0   Por {Int}
+			True ⇒ True		Por {Bool}
+
+			Esto es valido por bool
+
+ii. Num a => ∀ p::Polinomio a . ∀ k::a . ∀ e::a .
+evaluar e (derivado (Prod (Cte k) p)) = evaluar e (Prod (Cte k) (derivado p))
+
+	P(p) = ∀ k::a. ∀ e::a. evaluar e (derivado (Prod (Cte k) p)) = evaluar e (Prod (Cte k) (derivado p))
+
+	Qvq que P(p) vale ∀p::Polinomio a.
+
+
+
+		evaluar e (derivado (prod (Cte k) p)) 
+		Por {D} evaluar e (case (prod (Cte k) p) of ...)
+		Por {case} evaluar e (Suma (Prod (derivado (Cte k)) p) (Prod (derivado p) (Cte k))) 
+		Por {E} foldPoli e id (+) (*) (Suma (Prod (derivado (Cte k)) p) (Prod (derivado p) (Cte k)))
+		Por {FP} case (Suma (Prod (derivado (Cte k)) p) (Prod (derivado p) (Cte k))) of ...
+		Por {Case} foldPoli e id (+) (*)  (Prod (derivado (Cte k)) p) + foldPoli e id (+) (*) (Prod (derivado p) (Cte k))
+		Por {D, E} foldPoli e id (+) (*)  (Prod (case Cte k of ...) p) + evaluar e (Prod (derivado p) (Cte k))
+		Por {case} foldPoli e id (+) (*)  (Prod (Cte 0) p) + evaluar e (Prod (derivado p) (Cte k))
+		Por {FP} case (Prod (Cte 0) p) + evaluar e (Prod (derivado p) (Cte k))
+		Por {Case} foldPoli e id (+) (*) cte 0 * foldPoli e id (+) (*) p + evaluar e (Prod (derivado p) (Cte k))
+		Por {FP,E} (case cte 0 of ...) * (evaluar e p) + evaluar e (Prod (derivado p) (Cte k))
+		Por {Case} id 0 * evaluar e p + evaluar e (Prod (derivado p) (Cte k))
+		Por {id} 0 * evaluar e p + evaluar e (Prod (derivado p) (Cte k))
+		Por {int} evaluar e (Prod (derivado p) (Cte k))
+
+		Queda ver por lema que el producto es conmutativo
+
+iii. Num a => ∀ p::Polinomio a. (sinConstantesNegativas p⇒sinConstantesNegativas (derivado p))
+
+	P(p) = (sinConstantesNegativas p⇒sinConstantesNegativas (derivado p))
+
+	Qvq P(p) vale ∀p::Polinomio a. AHORA SI por induccion (LPM)
+
+	Caso P(X)
+
+							  sinConstantesNegativas X ⇒ sinConstantesNegativas (derivado X)
+		Por {S,D+Case} foldPoli True (>=0) (&&) (&&) X ⇒ sinConstantesNegativas (Cte 1)
+		Por {Fp+Case, FP} 						  True ⇒ foldPoli True (>=0) (&&) (&&) (Cte 1)
+		Por {FP+Case} 							  True ⇒ True
+
+	Caso P(Cte k)
+
+		
+							  sinConstantesNegativas (Cte k) ⇒ sinConstantesNegativas (derivado (Cte k))
+		Por {S,D+Case} foldPoli True (>=0) (&&) (&&) (Cte k) ⇒ sinConstantesNegativas (Cte 1)
+		Por {Fp+Case, FP} 						        k>=0 ⇒ foldPoli True (>=0) (&&) (&&) (Cte 1)
+		Por {FP+Case} 							  		k>=0 ⇒ 1>=0
+		Por {Int} 							  		k>=0 ⇒ True
+
+		Luego por LG bool, k>=0 es True o False, y para ambos casos, la implicacion es cierta por bool
+
+	Caso P(SUma i d)
+
+		Asumo como HI (P(i)^P(d)). Qvq P(i)^P(d)-->P(Suma i d)
+
+									  sinConstantesNegativas (Suma i d) ⇒ sinConstantesNegativas (derivado (Suma i d))
+		Por {S,D+Case} foldPoli True (>=0) (&&) (&&) (Suma i d) ⇒ sinConstantesNegativas (derivado i + derivado d)
+		Por {Fp+Case, FP} foldPoli True (>=0) (&&) (&&) i && foldPoli True (>=0) (&&) (&&) d ⇒ foldPoli True (>=0) (&&) (&&) (derivado i + derivado d)
+		Por {S x2,FP+Case} sinConstantesNegativas i && sinConstantesNegativas d ⇒ foldPoli True (>=0) (&&) (&&) (derivado i) && foldPoli True (>=0) (&&) (&&) (derivado d)
+		Por {E} sinConstantesNegativas i && sinConstantesNegativas d ⇒ sinConstantesNegativas (derivado i) && sinConstantesNegativas (derivado d)
+
+		Luego por HI
+		
+		-sinConstantesNegativas i⇒sinConstantesNegativas (derivado i)
+		-sinConstantesNegativas d⇒sinConstantesNegativas (derivado d)
+
+		Por lo tanto vale la implicacion y queda probado el caso Suma. Luego el caso Prod es completamente analogo
+
+		De esta manera, la propiedad P vale ∀p::Polinomio a
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
