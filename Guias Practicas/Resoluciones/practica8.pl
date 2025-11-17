@@ -159,3 +159,88 @@ coprimos(X,Y):- desde(1,X),between(1,X,Y),Res is gcd(X,Y),Res=:=1.
 
 %Ejercicio 14
 
+genFila([],0,0).
+genFila([Val|T],S,L):-
+    length([Val|T],L),
+    between(0, S, Val),
+    NS is S-Val,NL is L-1,genFila(T,NS,NL),
+    sumlist([Val|T], S).
+
+cuadradoSemiMagicoAux(_,[],0,_).
+cuadradoSemiMagicoAux(N,[F|Fs],CantFilas,Sum):-
+    CantFilas>0,
+    genFila(F,Sum,N),
+    NCF is CantFilas-1,
+    cuadradoSemiMagicoAux(N,Fs,NCF,Sum).
+
+cuadradoSemiMagico(N,Xs):-
+    desde(0,Sum),
+    cuadradoSemiMagicoAux(N,Xs,N,Sum).
+
+elemToList(X, [X]).
+
+transponer([], []).
+transponer([Xs], Rs) :- maplist(elemToList, Xs, Rs).
+transponer([Xs | Xss], Rss) :-
+    Xss \= [],
+    transponer([Xs], NXs),
+    transponer(Xss, NXss),
+    maplist(append, NXs, NXss, Rss).
+
+filasQueSumanN([],_).
+filasQueSumanN([F|Fs],N):-sumlist(F, N),filasQueSumanN(Fs,N).
+
+cuadradoMagico(N,Xs):-
+    desde(0,Sum),
+    cuadradoSemiMagicoAux(N,Xs,N,Sum),
+    transponer(Xs,TXs),
+    filasQueSumanN(TXs,Sum).
+
+%Ejercicio 16
+
+frutal(frutilla).
+frutal(banana).
+frutal(manzana).
+cremoso(banana).
+cremoso(americana).
+cremoso(frutilla).
+cremoso(dulceDeLeche).
+
+leGusta(X) :- frutal(X), cremoso(X).
+cucurucho(X,Y) :- leGusta(X), leGusta(Y).
+
+par(X):-X mod 2 =:= 0.
+impar(X):-X mod 2 =\= 0.
+
+%Ejercicio 18
+
+difListas(L1,L2,Res):-sumlist(L1, S1),sumlist(L2, S2),Res is abs(S1-S2).
+
+corteMasParejo(L,L1,L2):-
+    append(L1,L2,L),
+    difListas(L1,L2,Dif),
+not((append(L1p,L2p,L),L1p\=L1,L2p\=L2,difListas(L1p,L2p,Difp),Difp<Dif)).
+
+%Ejercicio 19
+
+p(X):-between(0,10000,X),X mod 7 =:= 0,X mod 12 =:=0,X mod 13 =:=0.
+
+%Quiero buscar el minimo X que cumpla p
+
+minimoXqueCumplaP(X):-p(X),not((p(Y),X>Y)).
+
+
+%Ejercicio 20
+
+primo(X):-Top is X-1,not((between(2, Top, Y),X mod Y =:= 0)).
+
+esNumPoderoso(X):-not((between(1, X, Div),primo(Div),X mod Div =:= 0,Sqr is Div**2,X mod Sqr =\= 0)).
+
+proxNumPoderoso(X,Num):-
+    Bottom is X+1,
+    desde(Bottom,Num),
+    esNumPoderoso(Num),
+    Top is Num-1,
+    not((between(Bottom, Top, Num2),esNumPoderoso(Num2))),
+    !.
+%no lo pude hacer sin cut :(
